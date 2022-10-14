@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'size',
-		'isEmpty',
 		'begin',
 		'end'
 	],
@@ -15,28 +14,17 @@ MyList >> add: aValue [
 	"comment stating purpose of instance-side method"
 	"scope: class-variables  &  instance-variables"	
 			
-	| node |
-	node:= MyNode new.
-	node value: aValue.
-	isEmpty
-	ifTrue: [ 
-		
-		node prevNode: node.
-		node nextNode: node.
-		begin:= node.
-		end:= node.
-		isEmpty:= false.
-		size:= size + 1.
-		]
-	ifFalse: [ 
-		end nextNode: node.
-		begin prevNode: node.
-		node value: aValue.
-		node prevNode: end.
-		node nextNode: begin.
-		end:=node.
-		size:= size + 1.
-		 ].
+	| lastNode  newNode|
+	lastNode:= end prevNode.
+	
+	newNode := MyNode new.
+	newNode value: aValue.
+	newNode nextNode: end.
+	newNode prevNode: lastNode.
+	
+	lastNode nextNode: newNode.
+	end prevNode: newNode.
+	size:= size + 1.
 ]
 
 { #category : #accessing }
@@ -45,7 +33,7 @@ MyList >> at: index [
 	"scope: class-variables  &  instance-variables"	
 			
 	| node |
-	isEmpty
+	(self isEmpty or: index> size)
 	ifTrue: [ 
 		^nil
 		 ]
@@ -64,7 +52,7 @@ MyList >> at: index put:aValue [
 	"scope: class-variables  &  instance-variables"	
 			
 	| node |
-	isEmpty
+	(self isEmpty or: index > size)
 	ifTrue: [ 
 		^nil
 		 ]
@@ -90,7 +78,6 @@ MyList >> initialize [
 	nilNode nextNode: nilNode.
 	super initialize.
 	size:=0.
-	isEmpty:=true.
 	begin:=nilNode.
 	end:=nilNode.
 	
@@ -99,7 +86,32 @@ MyList >> initialize [
 
 { #category : #accessing }
 MyList >> isEmpty [
-	^isEmpty
+	^(size == 0)
+]
+
+{ #category : #adding }
+MyList >> removeAt: anIndex [
+	"comment stating purpose of instance-side method"
+	"scope: class-variables  &  instance-variables"	
+			
+	| lastNode  nextNode|
+	
+	(self isEmpty or: anIndex > size)
+	ifTrue: [ 
+		^nil
+		 ]
+	ifFalse: [ 
+		lastNode:=begin.
+		1 to: anIndex - 1 do: [ 
+			:i|lastNode:= lastNode nextNode
+			 ].
+		 ].
+	nextNode:= lastNode nextNode nextNode.
+	
+	lastNode nextNode: nextNode.
+	nextNode prevNode: lastNode.
+	
+	size:= size - 1.
 ]
 
 { #category : #accessing }
